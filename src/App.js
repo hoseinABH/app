@@ -1,10 +1,18 @@
 import logo from './logo.svg';
 import './App.css';
 import { useRef } from 'react';
-import { exportComponentAsPNG } from 'react-component-export-image';
+import * as htmlToImage from 'html-to-image';
+import download from 'downloadjs';
 
 function App() {
   const testRef = useRef();
+
+  function handleSubmit() {
+    if (!testRef.current) return;
+    htmlToImage.toPng(testRef.current).then(function (dataUrl) {
+      download(dataUrl, 'my-node.png');
+    });
+  }
   return (
     <div className="App">
       <header className="App-header">
@@ -22,19 +30,7 @@ function App() {
         </a>
       </header>
 
-      <button
-        style={{ margin: '30px' }}
-        onClick={() => {
-          console.log('test');
-          exportComponentAsPNG(testRef, {
-            html2CanvasOptions: {
-              // onclone: (clonedDoc) => {
-              //   clonedDoc.getElementById('legend').style.visibility = 'visible';
-              // },
-            },
-          });
-        }}
-      >
+      <button style={{ margin: '30px' }} onClick={handleSubmit}>
         Export As PNG
       </button>
     </div>
