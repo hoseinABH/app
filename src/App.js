@@ -1,8 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
 import { useRef } from 'react';
-import * as htmlToImage from 'html-to-image';
-import download from 'downloadjs';
 import html2canvas from 'html2canvas';
 
 function App() {
@@ -11,6 +9,7 @@ function App() {
   const handleDownloadImage = async () => {
     const element = testRef.current;
     const canvas = await html2canvas(element, {
+      allowTaint: true,
       useCORS: true,
       logging: true,
     });
