@@ -1,33 +1,71 @@
 import './App.css';
 import { useRef } from 'react';
-import html2canvas from 'html2canvas';
+import { toBlob } from 'html-to-image';
+
+const n = navigator;
+const d = document;
+const ua = n.userAgent;
+
+export function isIOS() {
+  return (
+    [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod',
+    ].includes(n.platform) ||
+    // iPad on iOS 13 detection
+    (ua.includes('Mac') && 'ontouchend' in d)
+  );
+}
+
+/**
+ * sharing a file - it needs the node to convert to image
+ *
+ * @param {ShareFileData} { node, title, text, url }
+ * @return {Promise<void>}
+ */
+export function shareFile({ node, title }) {
+  if (node) {
+    return toBlob(node, { pixelRatio: 1 }).then(function (blob) {
+      const file = new File([blob], 'image.png', { type: blob.type });
+      /* NOTE: in ios devices the url is mandatory and if we don't send it the app will throw error
+				also if I send empty string the share api will send the url of page
+			 */
+      const shareData = {
+        ...(!isIOS()
+          ? {
+              title,
+            }
+          : {}),
+        files: [file],
+      };
+      if (navigator?.share) {
+        navigator?.share?.(shareData);
+      }
+    });
+  }
+}
 
 function App() {
   const testRef = useRef();
 
   const handleDownloadImage = async () => {
-    const element = testRef.current;
-    const canvas = await html2canvas(element, {
-      allowTaint: true,
-      useCORS: true,
-      logging: true,
-      foreignObjectRendering: true,
-    });
-    console.log(document.querySelector('.App-logo'));
+    const node = testRef.current;
 
-    const data = canvas.toDataURL();
-    const link = document.createElement('a');
-
-    if (typeof link.download === 'string') {
-      link.href = data;
-      link.download = 'test';
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      window.open(data);
-    }
+    shareFile({
+      node,
+      title: 'test',
+    })
+      .then(() => {
+        // the card has been sent
+        console.log('ok');
+      })
+      .finally(() => {
+        console.log('error');
+      });
   };
   return (
     <div className="App">
