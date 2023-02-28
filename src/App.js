@@ -3,21 +3,38 @@ import './App.css';
 import { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
 import download from 'downloadjs';
+import html2canvas from 'html2canvas';
 
 function App() {
   const testRef = useRef();
 
-  function handleSubmit() {
-    if (!testRef.current) return;
-    htmlToImage.toPng(testRef.current).then(function (dataUrl) {
-      download(dataUrl, 'my-node.png');
+  const handleDownloadImage = async () => {
+    const element = testRef.current;
+    const canvas = await html2canvas(element, {
+      useCORS: true,
+      logging: true,
     });
-  }
+    document.body.appendChild(canvas);
+
+    const data = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+
+    if (typeof link.download === 'string') {
+      link.href = data;
+      link.download = 'image.png';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      window.open(data);
+    }
+  };
   return (
     <div className="App">
-      <header className="App-header">
+      <header ref={testRef} className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p ref={testRef}>
+        <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
         <a
@@ -30,7 +47,7 @@ function App() {
         </a>
       </header>
 
-      <button style={{ margin: '30px' }} onClick={handleSubmit}>
+      <button style={{ margin: '30px' }} onClick={handleDownloadImage}>
         Export As PNG
       </button>
     </div>
