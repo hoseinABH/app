@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
@@ -12,15 +11,16 @@ function App() {
       allowTaint: true,
       useCORS: true,
       logging: true,
+      foreignObjectRendering: true,
     });
-    document.body.appendChild(canvas);
+    console.log(document.querySelector('.App-logo'));
 
-    const data = canvas.toDataURL('image/png');
+    const data = canvas.toDataURL();
     const link = document.createElement('a');
 
     if (typeof link.download === 'string') {
       link.href = data;
-      link.download = 'image.png';
+      link.download = 'test';
 
       document.body.appendChild(link);
       link.click();
@@ -32,7 +32,7 @@ function App() {
   return (
     <div className="App">
       <header ref={testRef} className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <img src="/logo.svg" className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
